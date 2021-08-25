@@ -1,6 +1,10 @@
 const { BadRequestError } = require("../expressError");
 
-// THIS NEEDS SOME GREAT DOCUMENTATION.
+/* Supports creating SQL/pg query statements by accepting data and manualy entered column names as parameters. Used to update companies and users tables.
+- dataToUpdate parameter specifies data to be updated (via reqest body)as a set of key/value pairs
+- jsToSql parameter is used to match SQL column names where they are formatted differently than their corresponding objects 
+- returns setCols (a string w/ column names for the SQL query) and values (an array of data values corresponding to the columns)
+See also: instance functions Company.update(handle, data) and User.update(username, data) */
 
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   const keys = Object.keys(dataToUpdate);
