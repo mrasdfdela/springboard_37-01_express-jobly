@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
+const { sqlForPartialUpdate, sqlWhereFromQuery } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -49,15 +49,20 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll() {
-    const companiesRes = await db.query(
-          `SELECT handle,
-                  name,
-                  description,
-                  num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-           FROM companies
-           ORDER BY name`);
+  static async findAll(query) {
+    let queryString = `SELECT handle,
+                        name,
+                        description,
+                        num_employees AS "numEmployees",
+                        logo_url AS "logoUrl"
+                      FROM companies`;
+    queryString = queryString + sqlWhereFromQuery(query);
+    queryString = queryString + ' ORDER BY name';
+    const companiesRes = await db.query(queryString);
+
+    if (!companiesRes.rows || companiesRes.rows.length === 0)  {
+      throw new NotFoundError(`Invalid search parameters!`);
+    }
     return companiesRes.rows;
   }
 

@@ -21,4 +21,24 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-module.exports = { sqlForPartialUpdate };
+function sqlWhereFromQuery(query){
+  let queryArr = [];
+  if (query) {
+    for ( const [k,v] of Object.entries(query) ) {
+      if (k === 'name') {
+        queryArr.push(`UPPER(${k}) LIKE UPPER('%${v}%')`);
+      } else if (k === 'minEmployees') {
+        queryArr.push(`num_employees >= ${v}`);
+      } else if (k === 'maxEmployees') {
+        queryArr.push(`num_employees <= ${v}`);
+      }
+    }
+  }
+  if (queryArr.length > 0) {
+    const queryString = ` WHERE ${queryArr.join(' AND ')}`
+    return queryString;
+  }
+  return ''
+}
+
+module.exports = { sqlForPartialUpdate, sqlWhereFromQuery };

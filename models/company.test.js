@@ -85,6 +85,101 @@ describe("findAll", function () {
       },
     ]);
   });
+
+  test("works: filter by name", async function () {
+    let query = { name: "c1" };
+    let companies = await Company.findAll(query);
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+    ]);
+  });
+  
+  test("works: filter by min employees", async function () {
+    let query = { minEmployees: "2" };
+    let companies = await Company.findAll(query);
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+  
+  test("works: filter by max employees", async function () {
+    let query = { maxEmployees: "2" };
+    let companies = await Company.findAll(query);
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+    ]);
+  });
+  
+  test("works: filter by max & min employees", async function () {
+    let query = { minEmployees: "2", maxEmployees: "3" };
+    let companies = await Company.findAll(query);
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+  
+  test("does not work: non-existant parameters", async function () {
+    try {
+      let query = { maxEmployees: "3", minEmployees: "2" };
+      await Company.findAll(query);
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+  
+  test("does not work: non-existant parameters", async function () {
+    try {
+      let query = { username: "not-a-company" };
+      await Company.findAll(query);
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
 });
 
 /************************************** get */
