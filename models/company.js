@@ -50,6 +50,7 @@ class Company {
    * */
 
   static async findAll(query) {
+
     let queryString = `SELECT handle,
                         name,
                         description,
@@ -61,7 +62,7 @@ class Company {
     const companiesRes = await db.query(queryString);
 
     if (!companiesRes.rows || companiesRes.rows.length === 0)  {
-      throw new NotFoundError(`Invalid search parameters!`);
+      throw new NotFoundError(`Invalid search parameters!`).status(400);
     }
     return companiesRes.rows;
   }

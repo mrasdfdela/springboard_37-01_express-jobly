@@ -21,6 +21,8 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
+/* Supports querying companies via the Company.findAll() instance method.Takes in query parameters from the request and translates it into a string to insert into a SQL WHERE clause. Note that if no valid query parameters are passed in, an empty string will be returned.*/
+
 function sqlWhereFromQuery(query){
   let queryArr = [];
   if (query) {
