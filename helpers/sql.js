@@ -23,24 +23,52 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
 /* Supports querying companies via the Company.findAll() instance method.Takes in query parameters from the request and translates it into a string to insert into a SQL WHERE clause. Note that if no valid query parameters are passed in, an empty string will be returned.*/
 
-function sqlWhereFromQuery(query){
+function sqlCompWhereQuery(query) {
   let queryArr = [];
   if (query) {
-    for ( const [k,v] of Object.entries(query) ) {
-      if (k === 'name') {
+    for (const [k, v] of Object.entries(query)) {
+      if (k === "name") {
         queryArr.push(`UPPER(${k}) LIKE UPPER('%${v}%')`);
-      } else if (k === 'minEmployees') {
+      } else if (k === "minEmployees") {
         queryArr.push(`num_employees >= ${v}`);
-      } else if (k === 'maxEmployees') {
+      } else if (k === "maxEmployees") {
         queryArr.push(`num_employees <= ${v}`);
       }
     }
   }
   if (queryArr.length > 0) {
-    const queryString = ` WHERE ${queryArr.join(' AND ')}`
+    const queryString = ` WHERE ${queryArr.join(" AND ")}`;
     return queryString;
   }
-  return ''
+  return "";
 }
 
-module.exports = { sqlForPartialUpdate, sqlWhereFromQuery };
+/* Supports querying companies via the Company.findAll() instance method.Takes in query parameters from the request and translates it into a string to insert into a SQL WHERE clause. Note that if no valid query parameters are passed in, an empty string will be returned.*/
+
+function sqlJobGetQuery(query) {
+  let queryArr = [];
+  if (query) {
+    for (const [k, v] of Object.entries(query)) {
+      if (k === "title") {
+        queryArr.push(`UPPER(${k}) LIKE UPPER('%${v}%')`);
+      } else if (k === "minSalary") {
+        queryArr.push(`salary >= ${v}`);
+      } else if (k === "hasEquity") {
+        if (v === true ) queryArr.push(`equity > 0`);
+      }
+
+    }
+  }
+  if (queryArr.length > 0) {
+    const queryString = ` WHERE ${queryArr.join(" AND ")}`;
+    console.log(queryString);
+    return queryString;
+  }
+  return "";
+}
+
+module.exports = {
+  sqlForPartialUpdate,
+  sqlCompWhereQuery,
+  sqlJobGetQuery,
+};

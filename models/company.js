@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate, sqlWhereFromQuery } = require("../helpers/sql");
+const { sqlForPartialUpdate, sqlCompWhereQuery } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -49,17 +49,14 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll(query) {
-
-    let queryString = `SELECT handle,
-                        name,
-                        description,
-                        num_employees AS "numEmployees",
-                        logo_url AS "logoUrl"
-                      FROM companies`;
-    queryString = queryString + sqlWhereFromQuery(query);
-    queryString = queryString + ' ORDER BY name';
-    const companiesRes = await db.query(queryString);
+  static async findAll() {
+    const companiesRes = await db.query(
+           `SELECT handle,
+            name,
+            description,
+            num_employees AS "numEmployees",
+            logo_url AS "logoUrl"
+            FROM companies`);
 
     if (!companiesRes.rows || companiesRes.rows.length === 0)  {
       throw new NotFoundError(`Invalid search parameters!`).status(400);
@@ -75,22 +72,23 @@ class Company {
    * Throws NotFoundError if not found.
    **/
 
-  static async get(handle) {
-    const companyRes = await db.query(
-          `SELECT handle,
-                  name,
-                  description,
-                  num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-           FROM companies
-           WHERE handle = $1`,
-        [handle]);
+  static async get(query) {
+    let queryString = `SELECT handle,
+                        name,
+                        description,
+                        num_employees AS "numEmployees",
+                        logo_url AS "logoUrl",
+                        json_agg(title) as jobs
+                        FROM companies AS c
+                        JOIN jobs AS j ON (c.handle = j.company_handle)`;
+    queryString = queryString + sqlCompWhereQuery(query);
+    queryString = queryString + ` GROUP BY c.handle ORDER BY name`;
+    const companiesRes = await db.query(queryString);
+    console.log(queryString);
+    if (!companiesRes.rows[0]) throw new NotFoundError(`No company: ${handle}`);
 
-    const company = companyRes.rows[0];
-
-    if (!company) throw new NotFoundError(`No company: ${handle}`);
-
-    return company;
+    console.log(companiesRes.rows)
+    return companiesRes.rows;
   }
 
   /** Update company data with `data`.
