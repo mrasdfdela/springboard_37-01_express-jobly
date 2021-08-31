@@ -192,7 +192,6 @@ describe("GET /users/:username", function () {
     const resp = await request(app)
         .get(`/users/u1`)
         .set("authorization", `Bearer ${u1Token}`);
-    console.log(resp.body);
     expect(resp.body).toEqual({
       user: {
         username: "u1",
@@ -200,6 +199,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: true,
+        jobApplications: expect.anything(),
       },
     });
   });
@@ -352,5 +352,39 @@ describe("DELETE /users/:username", function () {
         .delete(`/users/nope`)
         .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(404);
+  });
+});
+
+/**************************** job application */
+
+describe("POST /:username/jobs/:id", function(){
+  test("works", async function(){
+    const newJob = await db.query(`
+      INSERT INTO jobs (title, salary, equity, company_handle)
+      VALUES ('Logger', 45000, 0, 'c2')
+      RETURNING id, title, company_handle
+    `);
+
+    const username = "u1";
+    const jobId = newJob.rows[0].id;
+
+    const res = await request(app)
+      .post(`/users/${username}/jobs/${jobId}`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(res.body).toEqual({"applied": jobId})
+  });
+
+  test("not found; no such username", async function () {
+    const newJob = await db.query(`
+      INSERT INTO jobs (title, salary, equity, company_handle)
+      VALUES ('Logger', 45000, 0, 'c2')
+      RETURNING id, title, company_handle`);
+
+    const username = "u4";
+    const jobId = newJob.rows[0].id;
+
+    const res = await request(app)
+      .post(`/users/${username}/jobs/${jobId}`);
+    expect(res.statusCode).toEqual(401);
   });
 });

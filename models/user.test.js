@@ -140,6 +140,7 @@ describe("get", function () {
       lastName: "U1L",
       email: "u1@email.com",
       isAdmin: false,
+      jobApplications: expect.anything()
     });
   });
 
@@ -228,3 +229,52 @@ describe("remove", function () {
     }
   });
 });
+
+/**************************** job application */
+
+describe("/:username/jobs/:id", function(){
+  test("works", async function(){
+    const newJob = await db.query(`
+      INSERT INTO jobs (title, salary, equity, company_handle)
+      VALUES ('Chef', 60000, 0, 'c3')
+      RETURNING id, title, company_handle
+    `);
+
+    const username = "u1";
+    const jobId = newJob.rows[0].id;
+    const newApp = {username, jobId}
+    const res = await User.applyForJob(newApp);
+
+    expect(res).toEqual(jobId)
+  });
+
+  test("not found if no such username", async function () {
+    try{
+      const newJob = await db.query(`
+        INSERT INTO jobs (title, salary, equity, company_handle)
+        VALUES ('Logger', 45000, 0, 'c2')
+        RETURNING id, title, company_handle
+      `);
+
+      const username = "u4";
+      const jobId = newJob.rows[0].id;
+      const newApp = { username, jobId };
+      await User.applyForJob(newApp);
+      fail();
+    } catch (err){
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  });
+
+  test("not found if no such jobid", async function () {
+    try{
+      const username = "u1";
+      const jobId = 0;
+      const newApp = { username, jobId };
+      await User.applyForJob(newApp);
+      fail();
+    } catch (err){
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  });
+})
