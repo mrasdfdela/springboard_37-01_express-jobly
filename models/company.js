@@ -80,14 +80,12 @@ class Company {
                         logo_url AS "logoUrl",
                         json_agg(title) as jobs
                         FROM companies AS c
-                        JOIN jobs AS j ON (c.handle = j.company_handle)`;
+                        FULL JOIN jobs AS j ON (c.handle = j.company_handle)`;
     queryString = queryString + sqlCompWhereQuery(query);
     queryString = queryString + ` GROUP BY c.handle ORDER BY name`;
     const companiesRes = await db.query(queryString);
-    console.log(queryString);
-    if (!companiesRes.rows[0]) throw new NotFoundError(`No company: ${handle}`);
+    if (!companiesRes.rows[0]) throw new NotFoundError(`Company not found!`);
 
-    console.log(companiesRes.rows)
     return companiesRes.rows;
   }
 

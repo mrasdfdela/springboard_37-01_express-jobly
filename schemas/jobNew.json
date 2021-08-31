@@ -1,0 +1,40 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The job schema",
+    "examples": [
+        {
+            "title": "newJob",
+            "salary": 30000,
+            "equity": 0,
+            "companyHandle": "c3"
+        }
+    ],
+    "required": [
+        "title",
+        "companyHandle"
+    ],
+    "properties": {
+        "title": {
+            "type": "string",
+            "title": "The title schema"
+        },
+        "salary": {
+            "type": "integer",
+            "title": "The salary schema",
+            "minimum": 0
+        },
+        "equity": {
+            "type": "integer",
+            "title": "The equity schema",
+            "minimum": 0,
+            "maximum": 1.0
+        },
+        "companyHandle": {
+            "type": "string",
+            "title": "The companyHandle schema"
+        }
+    },
+    "additionalProperties": false
+}

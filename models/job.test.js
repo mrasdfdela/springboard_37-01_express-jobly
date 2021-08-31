@@ -60,10 +60,10 @@ describe("create", function () {
   });
 });
 
-/************************************** findAll */
+/************************************** get */
 
-describe("findAll", function () {
-  test("works", async function () {
+describe("get", function () {
+  test("works: no filter", async function () {
     let jobs = await Job.get();
     expect(jobs).toEqual([
       {
@@ -83,14 +83,10 @@ describe("findAll", function () {
         salary: 40000,
         equity: "0",
         company_handle: "c2",
-      }
+      },
     ]);
   });
-});
-
-/************************************** get */
-
-describe("get", function () {
+    
   test("works: filter by job title", async function () {
     let query = { title: "engineer" };
     let jobs = await Job.get(query);

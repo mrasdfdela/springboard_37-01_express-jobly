@@ -40,25 +40,9 @@ class Job {
     return job;
   }
 
-  /** Find all jobs.
-   *
-   * Returns [{ title, salary, equity, company_handle }, ...]
-   * */
-
-  static async findAll() {
-    const jobsRes = await db.query(
-      `SELECT title, salary, equity, company_handle
-      FROM jobs ORDER BY id`);
-
-    if (!jobsRes.rows[0] || jobsRes.rows.length === 0) {
-      throw new NotFoundError(`Invalid search parameters!`);
-    }
-    return jobsRes.rows;
-  }
-
   /** Given a job title, minimum salary, and/or equity, return jobs that have matching positions.
    *
-   * Returns { title, salary, equity, company_handle }
+   * Returns [{ title, salary, equity, company_handle }, ...]
    * Throws NotFoundError if not found.
    **/
 
@@ -73,6 +57,7 @@ class Job {
       throw new NotFoundError(`Invalid search parameters!`);
     }
     return jobsRes.rows;
+
   }
 
   /** Update job data with `data`.
@@ -88,10 +73,9 @@ class Job {
    */
 
   static async update(title, data) {
-    const { setCols, values } = sqlForPartialUpdate(
-                                  data, 
-                                  { companyHandle: "company_handle" }
-                                );
+    const { setCols, values } = sqlForPartialUpdate(data, {
+      companyHandle: "company_handle",
+    });
     const titleVarIdx = "$" + (values.length + 1);
 
     const querySql = `UPDATE jobs 
@@ -100,7 +84,7 @@ class Job {
                       RETURNING title, salary, equity, company_handle`;
     const result = await db.query(querySql, [...values, title]);
     const job = result.rows[0];
-    
+
     if (!job) throw new NotFoundError(`No job: ${title}`);
 
     return job;
@@ -114,14 +98,13 @@ class Job {
   static async remove(title) {
     const result = await db.query(
       `DELETE
-           FROM jobs
-           WHERE title = $1
-           RETURNING title`,
-      [title]
-    );
+      FROM jobs
+      WHERE title = $1
+      RETURNING title`,
+      [title]);
     const job = result.rows[0];
 
-    if (!job) throw new NotFoundError(`No company: ${title}`);
+    if (!job) throw new NotFoundError(`No job: ${title}`);
   }
 }
 
